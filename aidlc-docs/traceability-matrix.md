@@ -31,6 +31,8 @@
 > - U4 Functional Design: `aidlc-docs/construction/reflection-lambda/functional-design/business-logic-model.md`
 > - U5 Functional Design: `aidlc-docs/construction/frontend/functional-design/frontend-components.md`
 > - Code Generation Plan: `aidlc-docs/construction/plans/code-generation-plan.md`
+> - Evaluation Metrics: `aidlc-docs/inception/evaluation/metrics.md`
+> - Golden Dataset: `aidlc-docs/inception/evaluation/golden-dataset.jsonl` (30 test cases)
 >
 > Code (workspace root):
 > - Shared models: `shared/models/` (entities.py, enums.py)
@@ -105,7 +107,7 @@
 | FR-07.5 | S5 노약자 응답 단순화 + 재확인 | US-S5-01 | C4, C6 | P1 | Done |
 | FR-07.6 | S6 트립 종료 화자별 메모리 누적 | US-S6-01 | C5, C8 | P1 | Done |
 | FR-07.7 | S7 게스트 처리 + 메모리 미적용 | US-S7-01 | C2, C3, C5 | P0 | Done |
-| FR-08.1 | AgentCore Evaluations 3개 커스텀 지표 | US-SYS-02 | C9 (Optional P2) | P1 | Skipped |
+| FR-08.1 | AgentCore Evaluations 3개 커스텀 지표 | US-SYS-02 | C9 (Optional P2) | P1 | Done |
 | FR-08.2 | 평가 결과 대시보드 실시간 표시 | US-SYS-02 | C9 (Optional P2), C11 | P2 | Skipped |
 
 > `*` FR-07.4: requirements.md FR-07.4는 P1, 그러나 In Scope §4에는 S2가 핵심 시나리오로 포함되어 있음 (P0 데모 카드). §6 D-04 참조.
