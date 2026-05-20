@@ -13,11 +13,11 @@ COPY services/api-service/ /app/services/api-service/
 
 # Install dependencies
 RUN uv pip install --system --no-cache \
-    -e /app/shared \
-    -e /app/services/api-service
+    /app/shared \
+    /app/services/api-service
+
+WORKDIR /app/services/api-service
 
 EXPOSE 8080
 
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
-
-WORKDIR /app/services/api-service

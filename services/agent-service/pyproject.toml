@@ -14,7 +14,6 @@ dependencies = [
     "boto3>=1.35.0",
     "pyyaml>=6.0.0",
     "strands-agents>=0.1.0",
-    "family-car-agent-shared",
 ]
 
 [project.optional-dependencies]
@@ -33,9 +32,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
-
-[tool.uv.sources]
-family-car-agent-shared = { workspace = true }
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
