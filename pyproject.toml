@@ -1,0 +1,24 @@
+[project]
+name = "family-car-agent"
+version = "0.1.0"
+description = "Multi-speaker AI Car Agent with role-based personas"
+requires-python = ">=3.12"
+
+[tool.uv.workspace]
+members = [
+    "services/api-service",
+    "services/agent-service",
+    "services/reflection-lambda",
+    "shared",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "S", "B", "A", "COM", "C4", "PT", "RET", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
