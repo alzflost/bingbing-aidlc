@@ -1,0 +1,80 @@
+name: Build & Deploy to ECS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/**'
+      - 'shared/**'
+      - 'docker-compose.yml'
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 710619726471.dkr.ecr.us-east-1.amazonaws.com
+  ECS_CLUSTER: family-copilot-prod
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --all-packages --extra dev
+
+      - name: Run API Service tests
+        run: PYTHONPATH=".:services/api-service" uv run pytest services/api-service/tests -q
+
+      - name: Run Agent Service tests
+        run: PYTHONPATH="services/agent-service:." uv run pytest services/agent-service/tests -q
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - name: api-service
+            dockerfile: services/api-service/Dockerfile
+            ecr-repo: family-copilot/api-service
+            ecs-service: family-copilot-prod-api
+          - name: agent-service
+            dockerfile: services/agent-service/Dockerfile
+            ecr-repo: family-copilot/agent-service
+            ecs-service: family-copilot-prod-agent
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr-repo }}:${{ github.sha }} \
+                       -t ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr-repo }}:latest \
+                       -f ${{ matrix.service.dockerfile }} .
+          docker push ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr-repo }}:${{ github.sha }}
+          docker push ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr-repo }}:latest
+
+      - name: Force ECS deployment
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ matrix.service.ecs-service }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}

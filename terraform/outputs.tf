@@ -27,3 +27,8 @@ output "lambda_function_name" {
   description = "Reflection Lambda function name"
   value       = module.lambda.function_name
 }
+
+output "github_deploy_role_arn" {
+  description = "GitHub Actions deploy role ARN (set as repo secret AWS_DEPLOY_ROLE_ARN)"
+  value       = module.cicd.deploy_role_arn
+}

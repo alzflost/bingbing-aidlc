@@ -236,7 +236,7 @@ resource "aws_ecs_task_definition" "api" {
 
   container_definitions = jsonencode([{
     name  = "api-service"
-    image = "placeholder:latest"
+    image = "710619726471.dkr.ecr.us-east-1.amazonaws.com/family-copilot/api-service:latest"
     portMappings = [{
       containerPort = 8080
       protocol      = "tcp"
@@ -269,7 +269,7 @@ resource "aws_ecs_task_definition" "agent" {
 
   container_definitions = jsonencode([{
     name  = "agent-service"
-    image = "placeholder:latest"
+    image = "710619726471.dkr.ecr.us-east-1.amazonaws.com/family-copilot/agent-service:latest"
     portMappings = [{
       containerPort = 8081
       protocol      = "tcp"

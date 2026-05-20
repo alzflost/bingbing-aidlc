@@ -77,3 +77,12 @@ module "eventbridge" {
   lambda_arn      = module.lambda.function_arn
   lambda_name     = module.lambda.function_name
 }
+
+module "cicd" {
+  source = "./modules/cicd"
+
+  project_name = var.project_name
+  environment  = var.environment
+  aws_region   = var.aws_region
+  github_repo  = "alzflost/bingbing-aidlc"
+}
