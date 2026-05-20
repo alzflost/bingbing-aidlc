@@ -19,13 +19,33 @@
 - VPC + Private/Public Subnets + NAT Gateway
 - ALB (TLS 종단) + Target Groups
 - ECS Cluster + Task Definitions (API Service, Agent Service)
-- ElastiCache Valkey (Redis-compatible)
+- ElastiCache Valkey (Redis-compatible, IAM 인증 모드 — user/password 미사용)
+- DynamoDB Table (vehicle_profiles — 차량별 등록 가족 프로파일)
 - Lambda Function (Reflection)
 - EventBridge Rule (trip.ended)
 - IAM Roles (ECS Task, Lambda, 최소 권한)
 - CloudWatch Log Groups + Alarms
 - Secrets Manager (API keys)
 - Security Groups (서비스 간 통신 규칙)
+
+### AgentCore 셋업 (Terraform)
+- AgentCore Memory Store — `aws_bedrockagent_agent_memory` 리소스 (actor_id별 namespace)
+- AgentCore Policy Store — `aws_verifiedpermissions_policy_store` + `aws_verifiedpermissions_policy` 리소스로 CEDAR 정책 등록
+- AgentCore Evaluations — 해당 Terraform 리소스 존재 시 사용, 미지원 시 custom provider 또는 `terraform-provider-shell`로 래핑
+
+> 모든 인프라는 Terraform 리소스 블록으로 관리. CLI 스크립트나 CloudFormation 미사용.
+
+### DynamoDB: vehicle_profiles 테이블
+
+| PK | SK | 속성 |
+|---|---|---|
+| vehicle_id | actor_id | name, age_group, relationship, account_owner, default_seat_channel, preferences_summary |
+
+용도:
+- 차량에 등록된 가족 목록 조회 (회원가입 대체)
+- 좌석 채널 ↔ actor_id 기본 매핑 정보
+- Speaker Mapping 시 "이 차에 누가 등록되어 있는가" 참조
+- AgentCore Memory(LTM)는 선호도/에피소드 저장, DDB는 "신원 정보" 저장
 
 ---
 
@@ -43,7 +63,8 @@
 - Transcribe Streaming 연동 (LIVE + FALLBACK)
 - Speaker Mapping State Machine (3단계 + driver 자동 부여)
 - 500ms 동시 발화 버퍼링
-- Valkey 상태 저장/조회
+- Valkey 상태 저장/조회 (IAM 인증)
+- DynamoDB vehicle_profiles 조회 (등록 가족 확인)
 - Agent Service HTTP 호출
 
 ---
@@ -113,7 +134,9 @@ family-car-agent/
 │   ├── modules/
 │   │   ├── vpc/
 │   │   ├── ecs/
-│   │   ├── elasticache/
+│   │   ├── elasticache/        # Valkey (IAM 인증 모드)
+│   │   ├── dynamodb/           # vehicle_profiles 테이블
+│   │   ├── agentcore/          # Memory Store + Policy Store + Evaluations
 │   │   ├── lambda/
 │   │   ├── eventbridge/
 │   │   └── alb/
