@@ -28,5 +28,5 @@ strict = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+pythonpath = [".", "services/api-service", "services/agent-service"]
 testpaths = ["services/api-service/tests", "services/agent-service/tests"]
-pythonpath = [".", "services/api-service"]
