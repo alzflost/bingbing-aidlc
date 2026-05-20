@@ -27,6 +27,10 @@ class SpeakerMapping:
     async def handle_new_speaker(trip_id: str, spk_label: str) -> MappingAction
     async def get_state(trip_id: str) -> MappingState  # Idle/Onboarding/Active/Trip-end
     async def transition_state(trip_id: str, event: StateEvent) -> MappingState
+    async def buffer_concurrent(trip_id: str, utterance: Utterance) -> list[Utterance] | None
+    # buffer_concurrent: 500ms 윈도우 내 발화를 모아서 반환. 윈도우 만료 시 버퍼된 발화 리스트 반환.
+    async def assign_driver_role(trip_id: str, spk_label: str) -> None
+    # assign_driver_role: 운전석 채널 탑승자에게 driver=true 자동 부여
 ```
 
 ## C3: Policy Enforcer
@@ -71,12 +75,10 @@ class MemoryManager:
 ```python
 class PersonaRegistry:
     async def get_persona(actor_id: str) -> Persona
-    async def list_personas() -> list[Persona]
-    async def create_persona(persona: PersonaCreate) -> Persona
-    async def update_persona(actor_id: str, updates: PersonaUpdate) -> Persona
-    async def delete_persona(actor_id: str) -> None
-    async def auto_create_from_conversation(trip_id: str, spk_label: str, transcript: str) -> Persona | None
-    async def auto_update_from_pattern(actor_id: str, conversation_data: dict) -> None
+    async def get_persona_by_role(role_attrs: RoleAttributes) -> Persona
+    async def list_presets() -> list[Persona]
+    async def get_prompt_template(role_attrs: RoleAttributes) -> str
+    async def get_response_style(role_attrs: RoleAttributes) -> ResponseStyle
 ```
 
 ## C7: Tool Registry

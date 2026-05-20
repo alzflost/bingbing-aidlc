@@ -18,23 +18,22 @@
 
 | ID | 요구사항 | 우선순위 |
 |---|---|---|
-| FR-01.1 | WHEN 시동이 ON 되었을 때 THE SYSTEM SHALL 좌석 점유 센서 데이터를 확인하고 화자 자동 인식을 시작한다 | P0 |
+| FR-01.1 | WHEN 시동이 ON 되었을 때 THE SYSTEM SHALL 좌석 점유 센서 데이터를 확인하고 화자 인식을 시작한다. 운전석 채널 탑승자에게 자동으로 driver=true를 부여한다 | P0 |
 | FR-01.2 | THE SYSTEM SHALL Amazon Transcribe Streaming을 통해 실시간 음성을 텍스트로 변환하고 화자 라벨(spk_0~spk_N)을 부여한다 | P0 |
-| FR-01.3 | THE SYSTEM SHALL 4단계 자연스러운 화자 인식 전략으로 spk_N을 actor_id에 매핑한다: (1) 좌석 채널 자동 매핑 — 운전석/조수석은 채널로 자동 인식, (2) 대화형 자연 확인 — 첫 발화 시 자연스러운 대화로 확인 (예: "안녕하세요! OO 아빠시죠?"), (3) 암묵적 학습 — 말투/어휘/음성 특성으로 자동 추론, 확신도 낮을 때만 확인, (4) 명시적 확인은 옵셔널 — 추론 실패 시에만 "누구신지 말씀해주실래요?" 요청 | P0 |
-| FR-01.4 | WHEN 이전 트립에서 학습된 가족 구성원이 탑승했을 때 THE SYSTEM SHALL 자동 인식하여 별도 확인 없이 매핑한다 | P0 |
-| FR-01.5 | WHEN 미등록 음성이 감지되었을 때 THE SYSTEM SHALL 자연스러운 대화로 확인을 시도하고, 응답이 없거나 매핑 실패 시 게스트(actor_guest) 페르소나로 처리한다 | P0 |
-| FR-01.6 | THE SYSTEM SHALL 하이브리드 방식으로 동작한다 — Transcribe Streaming 실제 연동 + 데모 시 사전 녹음 fallback | P0 |
-| FR-01.7 | WHEN 좌석 변경 또는 새 탑승자가 감지되었을 때 THE SYSTEM SHALL 대화형 자연 확인으로 신규 화자를 인식한다 (강제 자기소개 없음) | P1 |
+| FR-01.3 | THE SYSTEM SHALL 3단계 매핑 전략으로 spk_N을 actor_id에 매핑한다: (1) 좌석 채널 기반 — 운전석/조수석 자동 매핑, (2) 자기소개 바인딩 — 미매핑 채널 발화 시 자연스러운 확인, (3) 어휘/말투 휴리스틱 — age_group 추정 (child/elder 보정) | P0 |
+| FR-01.4 | WHEN 미등록 음성이 감지되고 3단계 매핑 모두 실패했을 때 THE SYSTEM SHALL relationship=guest로 자동 처리한다 | P0 |
+| FR-01.5 | THE SYSTEM SHALL 하이브리드 방식으로 동작한다 — Transcribe Streaming 실제 연동 + 데모 시 사전 녹음 fallback | P0 |
+| FR-01.6 | WHEN 좌석 변경 또는 새 탑승자가 감지되었을 때 THE SYSTEM SHALL 자기소개 확인으로 신규 화자를 인식한다 | P1 |
 
 ### FR-02: 페르소나 관리 (Persona Management)
 
 | ID | 요구사항 | 우선순위 |
 |---|---|---|
-| FR-02.1 | THE SYSTEM SHALL 7개 기본 페르소나를 사전 정의하여 제공한다: 아빠(actor_father), 엄마(actor_mother), 유아(actor_toddler, 3~6세), 청소년(actor_teen, 13~18세), 성인 자녀(actor_adult_child, 19세+), 어르신(actor_elder, 성별 무관), 게스트(actor_guest) | P0 |
-| FR-02.2 | THE SYSTEM SHALL 런타임에 새 페르소나를 등록/수정/삭제할 수 있는 API를 제공한다 | P1 |
-| FR-02.3 | WHEN 대화 중 새 탑승자가 감지되었을 때 THE SYSTEM SHALL AI 판단으로 기본 프로파일(이름, 추정 연령대, 기본 권한)을 자동 생성한다 | P1 |
-| FR-02.4 | THE SYSTEM SHALL 대화 패턴 분석을 통해 기존 페르소나 속성(선호도, 말투 등)을 점진적으로 자동 업데이트한다 | P2 |
-| FR-02.5 | 각 페르소나는 고유한 응답 스타일(호칭, 정보 밀도, 톤, 발화 속도)을 가진다. 유아: 매우 단순/친근/안전 최우선, 청소년: 캐주얼/자율성 존중하되 안전 가드레일, 성인 자녀: 일반 성인 수준/독립적 | P0 |
+| FR-02.1 | THE SYSTEM SHALL 역할 속성 기반 페르소나 엔진을 제공한다. 속성: driver(bool), age_group(adult/teen/child/elder), account_owner(bool), relationship(owner/family/guest) | P0 |
+| FR-02.2 | THE SYSTEM SHALL 5개 데모용 프리셋을 사전 정의한다: 운전자(성인), 동승자(성인), 어린이, 어르신, 게스트 | P0 |
+| FR-02.3 | THE SYSTEM SHALL 운전석 채널 탑승자에게 자동으로 driver=true를 부여하여, 누구든 운전석에 앉으면 운전자 권한을 획득하게 한다 | P0 |
+| FR-02.4 | 각 역할 속성 조합은 고유한 응답 스타일(호칭, 정보 밀도, 톤, 발화 속도)과 권한 세트를 가진다 | P0 |
+| FR-02.5 | CEDAR 정책은 역할 속성 기반으로 작성되어, 프리셋 추가 없이 새로운 역할 조합을 커버한다 | P0 |
 
 ### FR-03: 권한 및 정책 (Permission & Policy)
 
@@ -50,9 +49,9 @@
 
 | ID | 요구사항 | 우선순위 |
 |---|---|---|
-| FR-04.1 | WHEN 복수 화자의 발화 시간이 겹쳤을 때 THE SYSTEM SHALL 컨텍스트 기반 동적 우선순위로 처리 순서를 결정한다 | P0 |
-| FR-04.2 | 주행 중: 안전 관련 발화(차량제어, 내비) > 운전자 일반 발화 > 동승자 발화 | P0 |
-| FR-04.3 | 정차 중: 선착순 처리, 운전자 특별 우선권 없음 | P1 |
+| FR-04.1 | WHEN 복수 화자의 발화가 500ms 이내 겹쳤을 때 THE SYSTEM SHALL 역할 속성 기반 우선순위로 처리 순서를 결정한다 | P0 |
+| FR-04.2 | 주행 중: driver=true + 안전 관련 발화 절대 우선 > driver=true 비안전 > adult family > elder > child/teen > guest | P0 |
+| FR-04.3 | 정차 중: driver 우선권 해제, 전원 선착순 처리 | P1 |
 | FR-04.4 | 우선순위가 낮은 발화는 큐잉 후 순차 처리한다 | P1 |
 
 ### FR-05: 메모리 관리 (Memory Management)
@@ -128,7 +127,7 @@
 
 | ID | 요구사항 |
 |---|---|
-| NFR-04.1 | 페르소나 동적 등록/수정 API로 무제한 페르소나 확장 가능 |
+| NFR-04.1 | 역할 속성 기반 CEDAR 정책으로 새로운 역할 조합을 프리셋 추가 없이 커버 가능 |
 | NFR-04.2 | ECS Fargate 기반 수평 확장 가능한 아키텍처 |
 
 ### NFR-05: 테스트 (Testing)
@@ -153,7 +152,7 @@
 | Evaluation | AgentCore Evaluations | 3개 커스텀 지표 실측 |
 | TTS | 텍스트 기본 + Polly 옵션 | 시간 여유 시 추가 |
 | Frontend | React + TypeScript | 풀 데모 UI (좌석 배치도, 권한 대시보드, 메모리 상태, Evaluation 지표) |
-| Deployment | ECS Fargate (메인) + Lambda (이벤트) | 서버리스, 메인 서비스는 컨테이너, Reflection 등은 Lambda |
+| Deployment | ECS Fargate (메인) + Lambda (이벤트) | Terraform IaC, 프로덕션 레벨 (VPC, Private Subnet, ALB TLS) |
 | Speech-to-Text | Amazon Transcribe Streaming | 하이브리드 (실시간 + fallback) |
 | Security | SECURITY 전체 규칙 적용 | 프로덕션 수준 보안 |
 | Testing | PBT 전체 규칙 적용 | Hypothesis + fast-check |
@@ -162,25 +161,31 @@
 
 ## 4. Scope Definition (이번 세션)
 
-### In Scope (Critical Path + 데모 UI)
-- Speaker Mapping State Machine 구현
+### In Scope (프로덕션 레벨 최소 기능)
+- Speaker Mapping State Machine 구현 (3단계 매핑 + driver 자동 부여)
+- 역할 속성 기반 페르소나 엔진 + 5개 프리셋
 - AgentCore Memory actor_id 스코프 적용
-- AgentCore Policy CEDAR 정책 작성 및 연동
-- 페르소나 프롬프트 템플릿 5종
+- AgentCore Policy CEDAR 정책 작성 및 연동 (역할 속성 기반)
+- 페르소나 프롬프트 템플릿 (역할 속성 조합별)
 - Strands Agent 오케스트레이터
-- 핵심 시나리오 시연: S1(환영), S3(같은 말 다른 추천), S4(어린이 안전), S7(게스트)
-- React 풀 데모 UI (좌석 배치도, 권한 대시보드, 메모리 상태, Evaluation 지표)
-- Transcribe Streaming 하이브리드 연동
+- 핵심 시나리오: S1(환영), S3(같은 말 다른 추천), S4(어린이 안전), S2(동시 발화)
+- React 풀 UI (좌석 배치도, 권한 대시보드, 메모리 상태, Evaluation 지표)
+- Transcribe Streaming 하이브리드 연동 (LIVE + FALLBACK)
+- Terraform 인프라 코드 (ECS Fargate + ElastiCache + Lambda + VPC)
+- SECURITY 규칙 전체 적용 (프로덕션 레벨)
+- JWT 인증 + WebSocket 토큰
+- 구조화 로깅 + CloudWatch 알림
 
 ### Stretch Goals (시간 여유 시)
-- S2(동시 발화), S5(노약자), S6(Reflection)
+- S5(어르신), S6(Reflection), S7(게스트)
 - Amazon Polly TTS 연동
-- 동적 페르소나 자동 등록
 - AgentCore Evaluations 실측 대시보드
 
 ### Out of Scope
+- 동적 페르소나 런타임 등록/수정 API
+- AI 기반 자동 페르소나 생성
 - Voiceprint 등록 시스템
-- 프로덕션 배포 (CI/CD 파이프라인)
+- CI/CD 파이프라인
 - 다국어 지원
 - OTA 업데이트
 

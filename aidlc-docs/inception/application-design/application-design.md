@@ -40,9 +40,15 @@
 |---|---|---|
 | 통신 방식 | WebSocket | 양방향 실시간 (오디오 업스트림 + 응답 다운스트림) |
 | 서비스 구조 | 경량 분리 (2 services) | 빠른 개발 + 관심사 분리 (네트워크 I/O vs AI 로직) |
+| 내부 통신 | HTTP (REST) | 단순성, 7시간 타임박스 적합. gRPC는 과도. |
 | 상태 저장 | Valkey (Redis) | 서비스 재시작에도 매핑 상태 유지, 트립 단위 TTL |
 | Transcribe 연동 | 백엔드 (API Service) | 보안 (자격증명 서버사이드), 오디오 전처리 가능 |
 | 이벤트 처리 | EventBridge + Lambda | 트립 종료 비동기 처리, 비용 효율 |
+| Orchestrator | Strands Agents SDK | 사용자 선택 (Q4:E). AWS 네이티브, 도구 호출 내장 |
+| LLM | Claude Haiku 4.5 | 사용자 선택 (Q10:E). 빠른 응답 + 비용 효율. 품질 검증은 Construction에서 |
+| 페르소나 모델 | 역할 속성 기반 | driver/age_group/relationship 조합. 5개 프리셋 데모용 |
+| 인프라 전략 | Docker Compose(개발) + 사전 CDK(데모) | 7시간 타임박스 대응 |
+| 동시 발화 감지 | API Service 500ms 버퍼링 | C2(Speaker Mapping)에서 버퍼 후 Agent Service로 일괄 전달 |
 
 ## 3. 컴포넌트 요약 (11개)
 

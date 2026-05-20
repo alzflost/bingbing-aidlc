@@ -92,3 +92,19 @@
 **Context**: INCEPTION - Application Design complete.
 
 ---
+
+## Persona Redesign - Role-based Persona
+**Timestamp**: 2026-05-20T10:00:00Z
+**User Input**: "가족구성 형태가 한가지가 되는건데 괜찮을까? 아빠엄마자녀조부모 구성은 맞지만 형태가 아빠가 운전자일수도 엄마가 또는 성인자녀가 운전자일수도있는거라 그리고 조부모가아니라 손주가 있을수도있고 어떻게 생각해?"
+**AI Response**: Role-based Persona로 재설계. 고정 가족 역할 대신 역할 속성 조합(driver, age_group, account_owner, relationship) 기반. 데모용 프리셋 5개 유지하되 내부 엔진은 역할 기반. requirements.md, personas.md, stories.md 모두 동기화 완료.
+**Context**: INCEPTION - Application Design. Major design pivot: fixed personas → role-based personas.
+
+---
+
+## Application Design - Review Feedback Applied
+**Timestamp**: 2026-05-20T10:10:00Z
+**User Input**: "응 반영하자"
+**AI Response**: Applied review feedback: (1) Removed auto_create/auto_update from C6, (2) HTTP confirmed for internal comms, (3) Persona CRUD endpoints removed, (4) 500ms concurrent speech buffering flow defined in API Service, (5) Infrastructure strategy added (Docker Compose dev + pre-deployed CDK demo), (6) Demo vs Production distinction table added, (7) Transcribe mode switching (LIVE/FALLBACK/DEMO) defined, (8) C9 marked as optional P2.
+**Context**: INCEPTION - Application Design. Review issues addressed.
+
+---

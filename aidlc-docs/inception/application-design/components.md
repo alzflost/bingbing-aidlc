@@ -17,7 +17,7 @@
 
 | 항목 | 내용 |
 |---|---|
-| 책임 | spk_N → actor_id 매핑, 4단계 인식 전략 실행, 상태 머신 관리 |
+| 책임 | spk_N → actor_id 매핑, 3단계 인식 전략 실행, 상태 머신 관리, 500ms 동시 발화 버퍼링 |
 | 위치 | API Service (ECS Fargate) |
 | 통신 | Valkey (상태 저장), AgentCore Memory (프로파일 조회) |
 | 상태 | Stateful (Valkey에 매핑 상태 저장) |
@@ -53,7 +53,7 @@
 
 | 항목 | 내용 |
 |---|---|
-| 책임 | 페르소나 CRUD API, 프롬프트 템플릿 관리, 동적 페르소나 자동 생성/업데이트 |
+| 책임 | 역할 속성 기반 페르소나 엔진, 5개 프리셋 관리, 프롬프트 템플릿 조회 |
 | 위치 | Agent Service (ECS Fargate) |
 | 통신 | AgentCore Memory (페르소나 프로파일 저장) |
 | 상태 | Stateless |
@@ -76,11 +76,11 @@
 | 통신 | Valkey (STM 읽기), AgentCore Memory (LTM 쓰기) |
 | 상태 | Stateless (이벤트 기반) |
 
-## C9: Evaluation Collector (Agent Service)
+## C9: Evaluation Collector (Agent Service) [Optional — P2]
 
 | 항목 | 내용 |
 |---|---|
-| 책임 | 화자 식별 정확도, 페르소나 일관성, 가드레일 누락률 측정 및 AgentCore Evaluations 전송 |
+| 책임 | 화자 식별 정확도, 페르소나 일관성, 가드레일 누락률 측정 및 AgentCore Evaluations 전송. 데모 시 mock actual 값 사용. |
 | 위치 | Agent Service (ECS Fargate) |
 | 통신 | AgentCore Evaluations API |
 | 상태 | Stateless |
