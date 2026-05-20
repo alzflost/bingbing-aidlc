@@ -4,7 +4,7 @@
 - **Project Name**: Family Profile Co-pilot
 - **Project Type**: Greenfield
 - **Start Date**: 2026-05-20T09:00:00Z
-- **Current Stage**: INCEPTION - Requirements Analysis (Complete, Awaiting Approval)
+- **Current Stage**: INCEPTION - Workflow Planning
 
 ## Workspace State
 - **Existing Code**: No
@@ -27,7 +27,24 @@
 ### 🔵 INCEPTION PHASE
 - [x] Workspace Detection
 - [x] Requirements Analysis
-- [ ] User Stories
-- [ ] Workflow Planning
-- [ ] Application Design
-- [ ] Units Generation
+- [x] User Stories
+- [x] Workflow Planning
+- [ ] Application Design - EXECUTE
+- [ ] Units Generation - EXECUTE
+
+### 🟢 CONSTRUCTION PHASE
+- [ ] Functional Design - EXECUTE (per-unit)
+- [ ] NFR Requirements - EXECUTE (per-unit)
+- [ ] NFR Design - SKIP
+- [ ] Infrastructure Design - EXECUTE (per-unit)
+- [ ] Code Generation - EXECUTE (per-unit)
+- [ ] Build and Test - EXECUTE
+
+### 🟡 OPERATIONS PHASE
+- [ ] Operations - PLACEHOLDER
+
+## Current Status
+- **Lifecycle Phase**: INCEPTION
+- **Current Stage**: Workflow Planning Complete
+- **Next Stage**: Application Design
+- **Status**: Awaiting approval
