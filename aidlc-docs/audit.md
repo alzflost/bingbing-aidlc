@@ -108,3 +108,11 @@
 **Context**: INCEPTION - Application Design. Review issues addressed.
 
 ---
+
+## Units Generation - Approved + S1 Scenario Clarification
+**Timestamp**: 2026-05-20T10:30:00Z
+**User Input**: "검토 다했고 해보자 뭔가 기술스텍 선택하는거나 그런건 다음단계겠지만, US-S1-01에서 프론트에서 탑승 좌석센서로 판단해서 주는걸 목업을 해서 몇명이 탔는지 그리고 차에서 운전자가 탑승하면서 프로필을인증하는 시나리오를 목업해서 누가 탔는지정도만 주고 동승자는 이차를 사용하는 다른 프로필일 수도 있고 가입하진 않았지만 가족일수도 있고 아예 게스트도 일수 있는거지?"
+**AI Response**: Confirmed understanding. Updated US-S1-01 AC to reflect: (1) Frontend seat sensor mockup provides occupancy, (2) Driver authenticates via profile selection from DDB, (3) Passengers classified as: registered family / unregistered family / guest. Proceeding to CONSTRUCTION PHASE.
+**Context**: INCEPTION complete. Entering CONSTRUCTION PHASE.
+
+---
