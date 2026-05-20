@@ -18,6 +18,9 @@ RUN uv pip install --system --no-cache \
 
 WORKDIR /app/services/agent-service
 
+ENV PYTHONPATH="/app:/app/services/agent-service"
+ENV PROMPTS_DIR="/app/shared/prompts"
+
 EXPOSE 8081
 
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8081"]
