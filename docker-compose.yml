@@ -1,0 +1,37 @@
+services:
+  api-service:
+    build:
+      context: .
+      dockerfile: services/api-service/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - VALKEY_ENDPOINT=valkey
+      - VALKEY_PORT=6379
+      - AGENT_SERVICE_URL=http://agent-service:8081
+      - ENVIRONMENT=local
+      - AWS_REGION=us-east-1
+    depends_on:
+      - valkey
+      - agent-service
+
+  agent-service:
+    build:
+      context: .
+      dockerfile: services/agent-service/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - VALKEY_ENDPOINT=valkey
+      - VALKEY_PORT=6379
+      - ENVIRONMENT=local
+      - AWS_REGION=us-east-1
+      - PROMPTS_DIR=/app/shared/prompts
+    depends_on:
+      - valkey
+
+  valkey:
+    image: valkey/valkey:7.2-alpine
+    ports:
+      - "6379:6379"
+    command: valkey-server --save 60 1

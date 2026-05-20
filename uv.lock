@@ -7,6 +7,7 @@ members = [
     "family-car-agent",
     "family-car-agent-agent-service",
     "family-car-agent-api-service",
+    "family-car-agent-reflection-lambda",
     "family-car-agent-shared",
 ]
 
@@ -509,6 +510,27 @@ requires-dist = [
     { name = "websockets", specifier = ">=13.0" },
 ]
 provides-extras = ["dev"]
+
+[[package]]
+name = "family-car-agent-reflection-lambda"
+version = "0.1.0"
+source = { editable = "services/reflection-lambda" }
+dependencies = [
+    { name = "boto3" },
+    { name = "family-car-agent-shared" },
+    { name = "pydantic" },
+    { name = "redis" },
+    { name = "structlog" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "boto3", specifier = ">=1.35.0" },
+    { name = "family-car-agent-shared", editable = "shared" },
+    { name = "pydantic", specifier = ">=2.0.0" },
+    { name = "redis", specifier = ">=5.0.0" },
+    { name = "structlog", specifier = ">=24.0.0" },
+]
 
 [[package]]
 name = "family-car-agent-shared"
