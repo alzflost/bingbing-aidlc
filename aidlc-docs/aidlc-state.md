@@ -33,18 +33,18 @@
 - [x] Units Generation - COMPLETE
 
 ### 🟢 CONSTRUCTION PHASE
-- [ ] Functional Design - EXECUTE (per-unit)
-- [ ] NFR Requirements - EXECUTE (per-unit)
-- [ ] NFR Design - SKIP
-- [ ] Infrastructure Design - EXECUTE (per-unit)
-- [ ] Code Generation - EXECUTE (per-unit)
-- [ ] Build and Test - EXECUTE
+- [x] Functional Design - COMPLETE (all 5 units)
+- [x] NFR Requirements - COMPLETE (shared)
+- [x] NFR Design - SKIP
+- [x] Infrastructure Design - COMPLETE
+- [x] Code Generation - COMPLETE (Phase 0~6: shared models + Terraform + API Service + Agent Service + Reflection Lambda + Frontend + CI/CD)
+- [x] Build and Test - COMPLETE
 
 ### 🟡 OPERATIONS PHASE
 - [ ] Operations - PLACEHOLDER
 
 ## Current Status
-- **Lifecycle Phase**: INCEPTION
-- **Current Stage**: INCEPTION - Units Generation Complete
-- **Next Stage**: CONSTRUCTION PHASE
-- **Status**: Awaiting approval
+- **Lifecycle Phase**: CONSTRUCTION
+- **Current Stage**: CONSTRUCTION - Code Generation Complete
+- **Next Stage**: OPERATIONS (placeholder)
+- **Status**: Development Complete
