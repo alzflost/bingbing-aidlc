@@ -8,13 +8,15 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket         = "family-copilot-tfstate"
-    key            = "prod/terraform.tfstate"
-    region         = "ap-northeast-2"
-    dynamodb_table = "terraform-locks"
-    encrypt        = true
-  }
+  # Local backend for workshop environment
+  # Production: switch to S3 backend
+  # backend "s3" {
+  #   bucket         = "family-copilot-tfstate"
+  #   key            = "prod/terraform.tfstate"
+  #   region         = "ap-northeast-2"
+  #   dynamodb_table = "terraform-locks"
+  #   encrypt        = true
+  # }
 }
 
 provider "aws" {
