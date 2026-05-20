@@ -84,3 +84,11 @@
 **Context**: INCEPTION - Workflow Planning complete. Next: Application Design.
 
 ---
+
+## Application Design - Answers & Generation
+**Timestamp**: 2026-05-20T09:50:00Z
+**User Input**: "설문지 작성 했어"
+**AI Response**: Read answers (Q1:A WebSocket, Q2:B 경량분리, Q3:A Valkey상태저장, Q4:A 백엔드Transcribe). Generated 5 design artifacts: components.md (11 components), component-methods.md, services.md (2 services + 1 Lambda), component-dependency.md, application-design.md (consolidated).
+**Context**: INCEPTION - Application Design complete.
+
+---
