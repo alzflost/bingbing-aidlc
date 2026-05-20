@@ -29,7 +29,7 @@ export function ChatInput({ send }: ChatInputProps) {
     const actorId = actor?.actor_id ?? `spk_${selectedSeat}`
 
     addMessage({
-      id: crypto.randomUUID(),
+      id: `msg-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
       type: 'utterance',
       actor_id: actorId,
       text: transcript,

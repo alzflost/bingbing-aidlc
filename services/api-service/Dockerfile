@@ -11,6 +11,9 @@ COPY shared/ /app/shared/
 # Copy service
 COPY services/api-service/ /app/services/api-service/
 
+# Copy frontend build
+COPY frontend/dist/ /app/static/
+
 # Install dependencies
 RUN uv pip install --system --no-cache \
     "pydantic>=2.0.0" "fastapi>=0.115.0" "uvicorn[standard]>=0.30.0" \

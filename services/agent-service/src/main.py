@@ -79,12 +79,26 @@ async def process_utterance(
     role_attrs = request.role_attrs or RoleAttributes()
     persona_key = _persona.get_persona_key(role_attrs)
 
+    # Load preferences from DynamoDB
+    preferences_context = ""
+    try:
+        import boto3
+        dynamodb = boto3.resource("dynamodb", region_name=settings.aws_region)
+        table = dynamodb.Table(settings.dynamodb_table)
+        item = table.get_item(
+            Key={"vehicle_id": "vehicle-001", "actor_id": request.actor_id},
+        ).get("Item", {})
+        preferences_context = item.get("preferences_summary", "")
+    except Exception as e:
+        logger.warning("ddb_preferences_load_failed", error=str(e))
+
     # Use real orchestrator with Strands Agent + Bedrock
     try:
         response_text = await _orchestrator.process(
             actor_id=request.actor_id,
             transcript=request.transcript,
             role_attrs=role_attrs,
+            preferences_context=preferences_context,
             context=request.context,
         )
     except Exception as e:

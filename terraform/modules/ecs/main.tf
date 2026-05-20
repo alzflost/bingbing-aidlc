@@ -186,8 +186,11 @@ resource "aws_iam_role_policy" "agent_task" {
     Statement = [
       {
         Effect   = "Allow"
-        Action   = ["bedrock:InvokeModel"]
-        Resource = ["arn:aws:bedrock:*::foundation-model/anthropic.claude-*"]
+        Action   = ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream", "bedrock:Converse", "bedrock:ConverseStream"]
+        Resource = [
+          "arn:aws:bedrock:*::foundation-model/anthropic.claude-*",
+          "arn:aws:bedrock:*:*:inference-profile/us.anthropic.*"
+        ]
       },
       {
         Effect   = "Allow"
@@ -277,7 +280,7 @@ resource "aws_ecs_task_definition" "agent" {
     environment = [
       { name = "VALKEY_ENDPOINT", value = var.valkey_endpoint },
       { name = "DYNAMODB_TABLE", value = var.dynamodb_table_name },
-      { name = "BEDROCK_MODEL_ID", value = "anthropic.claude-3-5-haiku-20241022-v1:0" },
+      { name = "BEDROCK_MODEL_ID", value = "us.anthropic.claude-haiku-4-5-20251001-v1:0" },
       { name = "ENVIRONMENT", value = var.environment },
     ]
     logConfiguration = {

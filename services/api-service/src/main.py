@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 import httpx
 import structlog
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from shared.models import MappingState, TripSession, Utterance
@@ -404,3 +406,24 @@ if __name__ == "__main__":
         port=settings.port,
         reload=True,
     )
+
+# Static file serving (React frontend)
+from pathlib import Path
+
+_static_dir = Path("/app/static")
+if not _static_dir.exists():
+    _static_dir = Path(__file__).parent.parent / "static"
+
+if _static_dir.exists() and (_static_dir / "index.html").exists():
+    app.mount("/assets", StaticFiles(directory=_static_dir / "assets"), name="assets")
+
+    @app.get("/")
+    async def serve_index():
+        return FileResponse(_static_dir / "index.html")
+
+    @app.get("/{path:path}")
+    async def serve_spa(path: str):
+        file_path = _static_dir / path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(_static_dir / "index.html")

@@ -27,7 +27,7 @@ export const useTripStore = create<TripState>((set) => ({
 
   startTrip: (vehicleId, seatData) =>
     set({
-      tripId: crypto.randomUUID(),
+      tripId: (() => { try { return crypto.randomUUID(); } catch { return `trip-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`; } })(),
       vehicleId,
       state: 'onboarding',
       seatOccupancy: seatData,
