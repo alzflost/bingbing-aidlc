@@ -45,37 +45,38 @@ export function useWebSocket(url: string) {
       }
 
       const msg = parsed.data
+      const payload = msg.payload ?? raw
       switch (msg.type) {
         case 'transcription': {
-          const result = ConversationMessageSchema.safeParse(msg.payload)
+          const result = ConversationMessageSchema.safeParse(payload)
           if (result.success) {
             addMessage({ ...result.data, type: 'utterance' })
           }
           break
         }
         case 'agent_response': {
-          const result = ConversationMessageSchema.safeParse(msg.payload)
+          const result = ConversationMessageSchema.safeParse(payload)
           if (result.success) {
             addMessage({ ...result.data, type: 'agent_response' })
           }
           break
         }
         case 'mapping_update': {
-          const result = MappingUpdatePayloadSchema.safeParse(msg.payload)
+          const result = MappingUpdatePayloadSchema.safeParse(payload)
           if (result.success) {
             updateMapping(result.data.spk_label, result.data.actor_id)
           }
           break
         }
         case 'state_update': {
-          const result = StateUpdatePayloadSchema.safeParse(msg.payload)
+          const result = StateUpdatePayloadSchema.safeParse(payload)
           if (result.success) {
             updateState(result.data.state)
           }
           break
         }
         case 'permission_update': {
-          const result = PermissionUpdatePayloadSchema.safeParse(msg.payload)
+          const result = PermissionUpdatePayloadSchema.safeParse(payload)
           if (result.success) {
             updatePermissions(result.data.actor_id, result.data.permissions)
           }
@@ -95,7 +96,7 @@ export function useWebSocket(url: string) {
 
   const send = useCallback((type: string, payload: Record<string, unknown>) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type, payload }))
+      wsRef.current.send(JSON.stringify({ type, ...payload }))
     }
   }, [])
 

@@ -14,6 +14,7 @@ from shared.models import MappingState, TripSession, Utterance
 from src.config import settings
 from src.mapping.speaker_mapper import SpeakerMapper
 from src.mapping.state_machine import get_next_state
+from src.voice.transcribe import TranscribeClient, TranscriptionEvent
 
 logger = structlog.get_logger()
 
@@ -79,10 +80,54 @@ async def start_trip(
     )
     _sessions[trip_id] = session
 
-    # TODO: Load registered profiles from DynamoDB
+    from shared.models import VehicleProfile
+
+    demo_profiles = [
+        VehicleProfile(
+            vehicle_id=request.vehicle_id,
+            actor_id="actor_father",
+            name="아빠",
+            age_group="adult",
+            relationship="owner",
+            account_owner=True,
+            default_seat_channel=0,
+            preferences_summary="고기 좋아함, 운전 중 간결한 응답 선호",
+        ),
+        VehicleProfile(
+            vehicle_id=request.vehicle_id,
+            actor_id="actor_mother",
+            name="엄마",
+            age_group="adult",
+            relationship="family",
+            account_owner=False,
+            default_seat_channel=1,
+            preferences_summary="비건 선호, 건강식 관심",
+        ),
+        VehicleProfile(
+            vehicle_id=request.vehicle_id,
+            actor_id="actor_child_1",
+            name="민수",
+            age_group="child",
+            relationship="family",
+            account_owner=False,
+            default_seat_channel=2,
+            preferences_summary="공룡 좋아함, 만화 좋아함",
+        ),
+        VehicleProfile(
+            vehicle_id=request.vehicle_id,
+            actor_id="actor_elder_1",
+            name="할머니",
+            age_group="elder",
+            relationship="family",
+            account_owner=False,
+            default_seat_channel=3,
+            preferences_summary="느린 말투 선호, 큰 소리 싫어함",
+        ),
+    ]
+
     _mappers[trip_id] = SpeakerMapper(
         session=session,
-        registered_profiles=[],
+        registered_profiles=demo_profiles,
     )
 
     logger.info(
@@ -223,24 +268,130 @@ async def websocket_trip(
     await ws.accept()
     logger.info("ws_connected")
 
+    trip_id: str | None = None
+    transcribe = TranscribeClient(mode=settings.transcribe_mode)
+
+    async def on_transcription(event: TranscriptionEvent):
+        """Callback when Transcribe returns a result."""
+        if not trip_id:
+            return
+        # Process through speaker mapping + agent
+        try:
+            result = await process_utterance(ProcessRequest(
+                trip_id=trip_id,
+                spk_label=event.spk_label,
+                transcript=event.transcript,
+                seat_channel=event.seat_channel,
+            ))
+            await ws.send_json({"type": "utterance_processed", **result})
+
+            # Forward to agent
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                agent_resp = await client.post(
+                    f"{settings.agent_service_url}/agent/process",
+                    json={
+                        "actor_id": result.get("actor_id", ""),
+                        "transcript": event.transcript,
+                        "trip_id": trip_id,
+                    },
+                )
+                if agent_resp.status_code == 200:
+                    agent_data = agent_resp.json()
+                    await ws.send_json({
+                        "type": "agent_response",
+                        "payload": {
+                            "id": f"resp-{uuid.uuid4().hex[:8]}",
+                            "type": "agent_response",
+                            "actor_id": agent_data.get("actor_id", "agent"),
+                            "text": agent_data.get("text", ""),
+                            "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+                            "tool_used": agent_data.get("tool_used"),
+                            "policy_decision": None,
+                        },
+                    })
+        except Exception as e:
+            logger.error("transcription_processing_error", error=str(e))
+
     try:
         while True:
-            data = await ws.receive_json()
-            msg_type = data.get("type")
+            message = await ws.receive()
 
-            if msg_type == "trip_start":
-                result = await start_trip(TripStartRequest(**data))
-                await ws.send_json({"type": "trip_started", **result.model_dump()})
+            if message.get("type") == "websocket.disconnect":
+                break
 
-            elif msg_type == "utterance":
-                result = await process_utterance(ProcessRequest(**data))
-                await ws.send_json({"type": "utterance_processed", **result})
+            # Binary = audio data → send to Transcribe
+            if "bytes" in message:
+                await transcribe.send_audio(message["bytes"])
+                continue
 
-            elif msg_type == "trip_end":
-                result = await end_trip(data.get("trip_id", ""))
-                await ws.send_json({"type": "trip_ended", **result})
+            # JSON = control messages
+            if "text" in message:
+                import json
+                data = json.loads(message["text"])
+                msg_type = data.get("type")
+
+                if msg_type == "trip_start":
+                    result = await start_trip(TripStartRequest(**data))
+                    trip_id = result.trip_id
+                    await transcribe.connect(callback=on_transcription)
+                    await ws.send_json({"type": "trip_started", **result.model_dump()})
+
+                elif msg_type == "utterance":
+                    # Text-based utterance (fallback / text input)
+                    data["trip_id"] = data.get("trip_id") or trip_id
+                    result = await process_utterance(ProcessRequest(**data))
+                    await ws.send_json({"type": "utterance_processed", **result})
+
+                    # Build role_attrs from mapped actor
+                    actor_id = result.get("actor_id", "unknown")
+                    role_attrs = None
+                    if trip_id and trip_id in _mappers:
+                        mapper = _mappers[trip_id]
+                        for p in mapper._profiles.values():
+                            if p.actor_id == actor_id:
+                                role_attrs = {
+                                    "driver": actor_id == _sessions[trip_id].driver_actor_id,
+                                    "age_group": str(p.age_group),
+                                    "relationship": str(p.relationship),
+                                    "account_owner": p.account_owner,
+                                }
+                                break
+
+                    try:
+                        async with httpx.AsyncClient(timeout=10.0) as client:
+                            agent_resp = await client.post(
+                                f"{settings.agent_service_url}/agent/process",
+                                json={
+                                    "actor_id": actor_id,
+                                    "transcript": data.get("transcript", ""),
+                                    "trip_id": trip_id or "",
+                                    "role_attrs": role_attrs,
+                                },
+                            )
+                            if agent_resp.status_code == 200:
+                                agent_data = agent_resp.json()
+                                await ws.send_json({
+                                    "type": "agent_response",
+                                    "payload": {
+                                        "id": f"resp-{uuid.uuid4().hex[:8]}",
+                                        "type": "agent_response",
+                                        "actor_id": agent_data.get("actor_id", "agent"),
+                                        "text": agent_data.get("text", ""),
+                                        "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+                                        "tool_used": agent_data.get("tool_used"),
+                                        "policy_decision": None,
+                                    },
+                                })
+                    except Exception as e:
+                        logger.error("agent_forward_error", error=str(e))
+
+                elif msg_type == "trip_end":
+                    await transcribe.disconnect()
+                    result = await end_trip(data.get("trip_id", ""))
+                    await ws.send_json({"type": "trip_ended", **result})
 
     except WebSocketDisconnect:
+        await transcribe.disconnect()
         logger.info("ws_disconnected")
 
 

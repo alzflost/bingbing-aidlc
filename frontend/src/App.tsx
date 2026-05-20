@@ -1,6 +1,7 @@
 import { Header } from '@/components/Header'
 import { SeatMap } from '@/components/SeatMap'
 import { ConversationStream } from '@/components/ConversationStream'
+import { ChatInput } from '@/components/ChatInput'
 import { DriverAuth } from '@/components/DriverAuth'
 import { PermissionDashboard } from '@/components/PermissionDashboard'
 import { MemoryPanel } from '@/components/MemoryPanel'
@@ -9,10 +10,12 @@ import { useWebSocket } from '@/hooks/useWebSocket'
 import { useTripStore } from '@/stores/tripStore'
 import type { VehicleProfile } from '@/types'
 
-const WS_URL = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`
+const WS_URL = import.meta.env.DEV
+  ? 'ws://localhost:8080/ws/trip'
+  : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/trip`
 
 export function App() {
-  const { connected, sendTripStart, sendTripEnd } = useWebSocket(WS_URL)
+  const { connected, send, sendTripStart, sendTripEnd } = useWebSocket(WS_URL)
   const tripState = useTripStore((s) => s.state)
   const startTrip = useTripStore((s) => s.startTrip)
   const endTrip = useTripStore((s) => s.endTrip)
@@ -73,13 +76,16 @@ export function App() {
                 <ConversationStream />
               </div>
               {tripState === 'active' && (
-                <button
-                  data-testid="end-trip-button"
-                  onClick={handleEndTrip}
-                  className="px-4 py-2 bg-red-700 hover:bg-red-600 rounded text-sm transition-colors self-end"
-                >
-                  시동 OFF (트립 종료)
-                </button>
+                <>
+                  <ChatInput send={send} />
+                  <button
+                    data-testid="end-trip-button"
+                    onClick={handleEndTrip}
+                    className="px-4 py-2 bg-red-700 hover:bg-red-600 rounded text-sm transition-colors self-end"
+                  >
+                    시동 OFF (트립 종료)
+                  </button>
+                </>
               )}
             </>
           )}

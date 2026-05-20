@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     valkey_port: int = 6379
     valkey_use_tls: bool = False
     dynamodb_table: str = "family-copilot-prod-vehicle-profiles"
-    bedrock_model_id: str = "anthropic.claude-3-5-haiku-20241022-v1:0"
+    bedrock_model_id: str = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
     aws_region: str = "us-east-1"
     environment: str = "local"
     prompts_dir: str = "shared/prompts"

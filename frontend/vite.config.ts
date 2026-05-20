@@ -11,12 +11,14 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/ws': {
-        target: 'ws://localhost:8000',
+      '/ws/trip': {
+        target: 'http://localhost:8080',
         ws: true,
+        changeOrigin: true,
       },
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8080',
+        changeOrigin: true,
       },
     },
   },

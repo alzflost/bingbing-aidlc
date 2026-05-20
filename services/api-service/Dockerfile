@@ -13,12 +13,14 @@ COPY services/api-service/ /app/services/api-service/
 
 # Install dependencies
 RUN uv pip install --system --no-cache \
-    /app/shared \
-    /app/services/api-service
-
-WORKDIR /app/services/api-service
+    "pydantic>=2.0.0" "fastapi>=0.115.0" "uvicorn[standard]>=0.30.0" \
+    "websockets>=13.0" "pydantic-settings>=2.0.0" "redis>=5.0.0" \
+    "httpx>=0.27.0" "structlog>=24.0.0" "boto3>=1.35.0" \
+    "amazon-transcribe>=0.6.0"
 
 ENV PYTHONPATH="/app:/app/services/api-service"
+
+WORKDIR /app/services/api-service
 
 EXPOSE 8080
 

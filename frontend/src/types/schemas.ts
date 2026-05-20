@@ -30,7 +30,7 @@ export const PolicyDecisionSchema = z.object({
 
 export const ConversationMessageSchema = z.object({
   id: z.string().min(1),
-  type: z.enum(['utterance', 'agent_response']),
+  type: z.enum(['utterance', 'agent_response']).optional(),
   actor_id: z.string().min(1),
   text: z.string(),
   timestamp: z.string(),
@@ -41,16 +41,19 @@ export const ConversationMessageSchema = z.object({
 export const WsMessageSchema = z.object({
   type: z.enum([
     'trip_start',
+    'trip_started',
     'trip_end',
+    'trip_ended',
     'audio_chunk',
     'transcription',
     'agent_response',
+    'utterance_processed',
     'mapping_update',
     'state_update',
     'permission_update',
     'error',
   ]),
-  payload: z.record(z.unknown()),
+  payload: z.record(z.unknown()).optional(),
 })
 
 export const MappingUpdatePayloadSchema = z.object({
