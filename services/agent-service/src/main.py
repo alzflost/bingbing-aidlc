@@ -10,12 +10,17 @@ from shared.models import RoleAttributes, ResponseStyle
 from src.config import settings
 from src.persona.registry import PersonaRegistry
 from src.policy.enforcer import PolicyEnforcer
+from src.orchestrator.agent import CarAgentOrchestrator
 
 logger = structlog.get_logger()
 
 # Initialize components
 _policy = PolicyEnforcer()
 _persona = PersonaRegistry(prompts_dir=settings.prompts_dir)
+_orchestrator = CarAgentOrchestrator(
+    persona_registry=_persona,
+    policy_enforcer=_policy,
+)
 
 
 @asynccontextmanager
@@ -73,15 +78,18 @@ async def process_utterance(
     """Process a single utterance — generate persona-appropriate response."""
     role_attrs = request.role_attrs or RoleAttributes()
     persona_key = _persona.get_persona_key(role_attrs)
-    style = _persona.get_response_style(role_attrs)
 
-    # TODO: Integrate Strands Agent with Bedrock for actual LLM call
-    # For now, generate a placeholder response based on persona
-    response_text = _generate_placeholder_response(
-        transcript=request.transcript,
-        persona_key=persona_key,
-        style=style,
-    )
+    # Use real orchestrator with Strands Agent + Bedrock
+    try:
+        response_text = await _orchestrator.process(
+            actor_id=request.actor_id,
+            transcript=request.transcript,
+            role_attrs=role_attrs,
+            context=request.context,
+        )
+    except Exception as e:
+        logger.error("orchestrator_error", error=str(e))
+        response_text = "죄송합니다, 잠시 후 다시 말씀해주세요."
 
     logger.info(
         "utterance_processed",
